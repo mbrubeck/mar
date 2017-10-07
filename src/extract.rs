@@ -6,7 +6,7 @@
 
 use read::read_index;
 use std::io::{self, BufReader, ErrorKind, Read, Seek, SeekFrom};
-use std::fs::{File, OpenOptions};
+use std::fs::{self, File, OpenOptions};
 #[cfg(unix)] use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
 
@@ -22,7 +22,13 @@ pub fn extract<P: AsRef<Path>>(path: P) -> io::Result<()> {
         archive.seek(SeekFrom::Start(item.offset as u64))?;
         let mut data = archive.by_ref().take(item.length as u64);
 
-        // TODO: Create parent directory if necessary.
+        // Create parent directories if necessary.
+        // TODO: Consolidate duplicate parents to make this more efficient?
+        {
+            let dir = Path::new(&item.name).parent()
+                .ok_or(io::Error::new(ErrorKind::InvalidData, ""))?;
+            fs::create_dir_all(dir)?;
+        }
 
         // Write data to a file.
         let mut options = OpenOptions::new();
