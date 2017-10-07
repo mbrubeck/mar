@@ -1,9 +1,10 @@
 extern crate byteorder;
 
 mod read;
+pub mod extract;
 
 /// An entry in the MAR index.
-struct MarItem {
+pub struct MarItem {
     /// Position of the item within the archive file.
     offset: u32,
     /// Length of data in bytes.
@@ -11,10 +12,8 @@ struct MarItem {
     /// File mode bits.
     flags: u32,
     /// File path.
-    name: Vec<u8>, // XXX use String, OsString, or PathBuf instead?
+    name: String,
 }
-
-const BLOCKSIZE: usize = 4096;
 
 /// Round `n` up to the nearest multiple of `incr`.
 #[inline]

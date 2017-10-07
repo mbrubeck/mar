@@ -8,25 +8,25 @@ const MAR_ID: &[u8; MAR_ID_SIZE] = b"MAR1";
 const MAR_ID_SIZE: usize = 4;
 
 /// Read the index from a MAR file.
-fn read_index<R>(mut file: R) -> io::Result<Vec<MarItem>>
+pub fn read_index<R>(mut archive: R) -> io::Result<Vec<MarItem>>
     where R: Read + Seek
 {
     // Verify the magic bytes.
     let mut id = [0; MAR_ID_SIZE];
-    file.read_exact(&mut id)?;
+    archive.read_exact(&mut id)?;
     if id != *MAR_ID {
         return Err(io::Error::new( ErrorKind::InvalidData,
             "Not a MAR file (invalid bytes at start of file)."))
     }
 
     // Seek to the index.
-    let offset_to_index = file.read_u32::<BigEndian>()?;
-    file.seek(SeekFrom::Start(offset_to_index as u64))?;
+    let offset_to_index = archive.read_u32::<BigEndian>()?;
+    archive.seek(SeekFrom::Start(offset_to_index as u64))?;
 
     // Read the index into memory.
-    let size_of_index = file.read_u32::<BigEndian>()?;
+    let size_of_index = archive.read_u32::<BigEndian>()?;
     let mut buf = vec![0; size_of_index as usize];
-    file.read_exact(&mut buf)?;
+    archive.read_exact(&mut buf)?;
 
     // Reach each item from the index.
     let mut items = vec![];
@@ -37,13 +37,17 @@ fn read_index<R>(mut file: R) -> io::Result<Vec<MarItem>>
     Ok(items)
 }
 
-fn read_next_item<R: BufRead>(mut file: R) -> io::Result<MarItem> {
-    let offset = file.read_u32::<BigEndian>()?;
-    let length = file.read_u32::<BigEndian>()?;
-    let flags = file.read_u32::<BigEndian>()?;
+/// Read a single entry from the index.
+fn read_next_item<R: BufRead>(mut index: R) -> io::Result<MarItem> {
+    let offset = index.read_u32::<BigEndian>()?;
+    let length = index.read_u32::<BigEndian>()?;
+    let flags = index.read_u32::<BigEndian>()?;
     
     let mut name = Vec::new();
-    file.read_until(0, &mut name)?;
+    index.read_until(0, &mut name)?;
+
+    let name = String::from_utf8(name)
+        .or(Err(io::Error::new(ErrorKind::InvalidData, "Filename is not UTF-8")))?;
     
     Ok(MarItem { offset, length, flags, name })
 }
