@@ -1,6 +1,6 @@
 [package]
 name = "mar"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Matt Brubeck <mbrubeck@limpet.net>"]
 license = "MPL-2.0"
 description = "Library for reading and writing Mozilla Archive files"
