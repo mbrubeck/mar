@@ -2,6 +2,13 @@
 name = "mar"
 version = "0.1.0"
 authors = ["Matt Brubeck <mbrubeck@limpet.net>"]
+license = "MPL-2.0"
+description = "Library for reading and writing Mozilla Archive files"
+documentation = "https://docs.rs/mar/"
+repository = "https://github.com/mbrubeck/mar"
+readme = "README.md"
+keywords = ["archive", "format", "signature"]
+categories = ["cryptography", "parser-implementations"]
 
 [dependencies]
 byteorder = "1.1"
