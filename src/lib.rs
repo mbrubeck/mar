@@ -8,7 +8,7 @@ mod read;
 pub mod extract;
 
 /// An entry in the MAR index.
-pub struct MarItem {
+struct MarItem {
     /// Position of the item within the archive file.
     offset: u32,
     /// Length of data in bytes.

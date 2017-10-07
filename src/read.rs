@@ -13,7 +13,7 @@ const MAR_ID_SIZE: usize = 4;
 /// Read the index from a MAR file.
 ///
 /// TODO: Return an iterator?
-pub fn read_index<R>(mut archive: R) -> io::Result<Vec<MarItem>>
+pub(crate) fn read_index<R>(mut archive: R) -> io::Result<Vec<MarItem>>
     where R: Read + Seek
 {
     // Verify the magic bytes.
