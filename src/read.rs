@@ -1,13 +1,14 @@
 use byteorder::{BigEndian, ReadBytesExt};
 use MarItem;
-use std::io;
-use std::io::{BufRead, ErrorKind, Read, Seek, SeekFrom};
+use std::io::{self, BufRead, ErrorKind, Read, Seek, SeekFrom};
 
 /// Magic bytes found at the start of a MAR file.
 const MAR_ID: &[u8; MAR_ID_SIZE] = b"MAR1";
 const MAR_ID_SIZE: usize = 4;
 
 /// Read the index from a MAR file.
+///
+/// TODO: Return an iterator?
 pub fn read_index<R>(mut archive: R) -> io::Result<Vec<MarItem>>
     where R: Read + Seek
 {
@@ -45,6 +46,7 @@ fn read_next_item<R: BufRead>(mut index: R) -> io::Result<MarItem> {
     
     let mut name = Vec::new();
     index.read_until(0, &mut name)?;
+    name.pop(); // Remove the trailing NUL.
 
     let name = String::from_utf8(name)
         .or(Err(io::Error::new(ErrorKind::InvalidData, "Filename is not UTF-8")))?;
