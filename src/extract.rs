@@ -24,9 +24,10 @@ pub fn extract<P: AsRef<Path>>(path: P) -> io::Result<()> {
 
         // Create parent directories if necessary.
         // TODO: Consolidate duplicate parents to make this more efficient?
+        // TODO: Prevent directory traversal?
         {
             let dir = Path::new(&item.name).parent()
-                .ok_or(io::Error::new(ErrorKind::InvalidData, ""))?;
+                .ok_or(io::Error::new(ErrorKind::InvalidData, "File name must not be empty"))?;
             fs::create_dir_all(dir)?;
         }
 
@@ -37,12 +38,12 @@ pub fn extract<P: AsRef<Path>>(path: P) -> io::Result<()> {
         #[cfg(unix)] {
             options.mode(item.flags);
         }
-        let mut file = options.open(item.name)?; // XXX prevent directory traversal
+        let mut file = options.open(item.name)?;
 
         // Copy the data.
         let bytes_written = io::copy(&mut data, &mut file)?;
         if bytes_written != item.length as u64 {
-            return Err(io::Error::new(ErrorKind::UnexpectedEof, ""))
+            return Err(io::Error::new(ErrorKind::UnexpectedEof, "Unexpected end of file"))
         }
     }
 
