@@ -2,10 +2,27 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+//! This is a Rust implementation of the [Mozilla Archive (MAR) file format][1]
+//! used to deliver automatic updates to Firefox.  It includes both a library and
+//! a command-line tool for reading and writing MAR files.
+//!
+//! This code is subject to the terms of the Mozilla Public License, v. 2.0.
+//!
+//! [1]: https://wiki.mozilla.org/Software_Update:MAR
+
 extern crate byteorder;
 
-mod read;
+pub mod read;
 pub mod extract;
+
+/// Metadata about an entire MAR file.
+pub struct MarFileInfo {
+    has_signature_block: bool,
+    num_signatures: u32,
+    has_additional_blocks: bool,
+    offset_additional_blocks: u32,
+    num_additional_blocks: u32,
+}
 
 /// An entry in the MAR index.
 struct MarItem {
@@ -24,9 +41,6 @@ struct MarItem {
 fn round_up(n: usize, incr: usize) -> usize {
     n / (incr + 1) * incr
 }
-
-/// Position of the signature block within the file.
-const SIGNATURE_BLOCK_OFFSET: usize = 16;
 
 /// Make sure the file is less than 500MB.  We do this to protect against invalid MAR files.
 const MAX_SIZE_OF_MAR_FILE: u64 = 500 * 1024 * 1024;
